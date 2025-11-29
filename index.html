@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>汕尾霖墅装饰设计工程有限公司</title>
+	<link rel="icon" href="logo.jpg" type="image/jpeg">
+	<style>
+		:root{--accent:hsl(40, 40%, 40%);--muted:#666}
+		body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#222}
+		header{display:flex;align-items:center;gap:16px;padding:18px 24px;background:rgb(40,40,40);border-bottom:1px solid rgba(255,255,255,0.06);color:#fff}
+		.logo{display:flex;align-items:center;gap:12px}
+		.logo img{height:56px;width:56px;object-fit:contain}
+		/* 轮播容器保持 16:9 比例，图片铺满容器；确保每张幻灯片占据容器宽度 */
+		.carousel{aspect-ratio:16/9;width:100%}
+		.carousel .slides{width:100%;height:100%;display:flex}
+		.carousel .slides img{flex:0 0 100%;width:100%;height:100%;object-fit:contain;background:#000;object-position:center;transition:transform .6s ease, opacity .6s ease;opacity:0}
+		.menu-btn{display:none;background:transparent;border:none;color:inherit;font-size:22px;cursor:pointer}
+
+		/* 汉堡图标（用于移动菜单） */
+		.menu-btn{padding:8px;display:inline-flex;align-items:center;justify-content:center}
+		.menu-btn .hamburger{display:inline-block;width:22px;height:18px;position:relative}
+		.menu-btn .hamburger span{position:absolute;left:0;right:0;height:2px;background:#fff;border-radius:2px;display:block;transition:transform .28s ease,opacity .2s ease,top .28s ease}
+		.menu-btn .hamburger span:nth-child(1){top:0}
+		.menu-btn .hamburger span:nth-child(2){top:8px}
+		.menu-btn .hamburger span:nth-child(3){top:16px}
+		.menu-btn.active .hamburger span:nth-child(1){top:8px;transform:rotate(45deg)}
+		.menu-btn.active .hamburger span:nth-child(2){opacity:0}
+		.menu-btn.active .hamburger span:nth-child(3){top:8px;transform:rotate(-45deg)}
+		.company{font-size:18px;font-weight:700}
+		nav{margin-left:auto}
+		nav a{margin-left:12px;color:rgba(255, 255, 255, 0.9);text-decoration:none}
+		.hero{padding:28px 24px;background:linear-gradient(180deg,#fafafa,#fff)}
+		.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+		.card{background:#fff;border:1px solid #eee;padding:8px;border-radius:6px}
+		.card img{width:100%;height:160px;object-fit:contain;background:#f4f4f4;object-position:center;border-radius:4px;transition:transform .45s ease, opacity .45s ease}
+
+		/* dot animation */
+		.dots button{transition:transform .18s ease, background .18s ease}
+		.dots button.active{transform:scale(1.25)}
+
+		/* prev/next hover */
+		button.prev,button.next{transition:transform .18s ease,background .18s ease}
+		button.prev:hover,button.next:hover{transform:scale(1.08);background:rgba(0,0,0,.45)}
+		h2{margin:20px 0 8px;color:var(--accent)}
+		.contact{background:#f7f7f7;padding:18px;border-top:1px solid #eee}
+		.contact .phone{font-size:20px;color:#111;font-weight:600}
+		.contact .phone a{color:inherit;text-decoration:none}
+		.contact .phone a:hover{text-decoration:underline}
+		footer{padding:12px 24px;text-align:center;color:#888;font-size:13px}
+		/* 简易模态（点击图片查看大图） */
+		.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px;visibility:hidden;opacity:0;transition:opacity .15s}
+		.lightbox img{max-width:90%;max-height:90%}
+		.lightbox.show{visibility:visible;opacity:1}
+
+		/* 额外动效：导航、logo、卡片、淡入 reveal、返回顶部 */
+		/* nav underline */
+		nav a{position:relative}
+		nav a::after{content:'';position:absolute;left:12px;right:12px;height:2px;background:var(--accent);bottom:-6px;transform:scaleX(0);transform-origin:left center;transition:transform .22s ease}
+		nav a:hover::after, nav a:focus::after{transform:scaleX(1)}
+
+		/* logo reveal */
+		.logo img{transform:translateY(-6px) scale(.98);opacity:0;transition:transform .5s cubic-bezier(.2,.9,.2,1),opacity .5s}
+		.logo.show img{transform:none;opacity:1}
+
+		/* 卡片 hover 提升 */
+		.card{transition:transform .28s ease,box-shadow .28s ease}
+		.card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+
+		/* 滚动 reveal */
+		.reveal{opacity:0;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease}
+		.reveal.visible{opacity:1;transform:none}
+
+		/* lightbox zoom */
+		.lightbox img{transition:transform .35s ease}
+		.lightbox.show img{transform:scale(1)}
+
+		/* back to top */
+		#backTop{position:fixed;right:16px;bottom:20px;width:44px;height:44px;border-radius:6px;background:var(--accent);color:#fff;border:none;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,.18);cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .28s ease,transform .28s ease;z-index:999}
+		#backTop.show{opacity:1;transform:none}
+		@media (max-width:600px){.card img{height:140px}}
+
+		/* 手机适配 */
+		@media (max-width:768px){
+			header{flex-wrap:wrap;padding:12px}
+			.logo{flex:1;min-width:0}
+			.logo .company{font-size:16px}
+			.menu-btn{display:block;margin-left:auto}
+			/* mobile nav: use max-height transition instead of display to animate */
+			nav{width:100%;order:3;margin-top:8px;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .25s ease}
+			nav.show{max-height:420px;opacity:1}
+			nav a{margin-left:0;padding:8px 12px;background:transparent;border-radius:4px;color:rgba(255,255,255,0.95)}
+				/* 手机上保持 16:9，但限制最大高度以节省纵向空间 */
+				.carousel{max-height:200px}
+			.gallery{grid-template-columns:1fr}
+			.contact form div{flex-direction:column}
+			#nameInput,#phoneInput{width:100%}
+			#messageInput{height:100px}
+		}
+
+		/* 暗色模式支持 */
+		@media (prefers-color-scheme: dark){
+			body{color:#e0e0e0;background:#121212}
+			.hero{background:linear-gradient(180deg,#1e1e1e,#262626)}
+			.card{background:#2a2a2a;border-color:#444}
+			.contact{background:#1e1e1e;border-top-color:#444}
+			.contact .phone{color:#e0e0e0}
+			footer{color:#aaa}
+			h2{color:hsl(40, 60%, 50%)}
+		}
+	</style>
+</head>
+
+<body>
+    <audio id="bgMusic" src="music.mp3" loop></audio>
+    <style>
+    </style>
+	<header>
+		<div class="logo">
+			<img src="logo.jpg" alt="公司 LOGO" onerror="this.onerror=null;this.src='logo.png'" style="height:56px;width:56px;object-fit:contain">
+			<div>
+				<div class="company">汕尾霖墅装饰设计工程有限公司</div>
+				<div style="color:#ddd;font-size:13px">专业室内装饰设计 · CAD 平面图 · 效果图</div>
+			</div>
+			<button class="menu-btn" id="menuBtn" aria-label="显示菜单">☰</button>
+		</div>
+		<nav id="mainNav">
+			<a href="#plans">CAD 平面图</a>
+			<a href="#renders">效果图</a>
+			<a href="#contact">联系我们</a>
+		</nav>
+	</header>
+
+	<section class="hero">
+		<div style="max-width:1100px;margin:0 auto;">
+			<div style="display:flex;align-items:center;justify-content:space-between;gap:18px">
+				<div>
+					<h1 style="margin:0 0 8px">汕尾霖墅装饰设计工程有限公司</h1>
+					<p style="margin:0;color:var(--muted)">我们公司专业 CAD 平面图绘制与高质量效果图，已经在海丰县海迪公馆别墅区工作。</p>
+				</div>
+			</div>
+
+			<div class="carousel" id="carousel" style="margin-top:14px;position:relative;border-radius:8px;overflow:hidden;border:1px solid #eee">
+				<div class="slides" style="display:flex;transition:transform .45s ease">
+					<img src="1.jpg" alt="1" style="width:100%;flex-shrink:0;object-fit:contain;background:#000;object-position:center" loading="lazy" onerror="this.style.display='none'">
+					<img src="2.jpg" alt="2" style="width:100%;flex-shrink:0;object-fit:contain;background:#000;object-position:center" loading="lazy" onerror="this.style.display='none'">
+					<img src="3.jpg" alt="3" style="width:100%;flex-shrink:0;object-fit:contain;background:#000;object-position:center" loading="lazy" onerror="this.style.display='none'">
+					<img src="4.jpg" alt="4" style="width:100%;flex-shrink:0;object-fit:contain;background:#000;object-position:center" loading="lazy" onerror="this.style.display='none'">
+					<img src="5.jpg" alt="5" style="width:100%;flex-shrink:0;object-fit:contain;background:#000;object-position:center" loading="lazy" onerror="this.style.display='none'">
+				</div>
+				<button class="prev" aria-label="上一张" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.35);border:none;color:#fff;padding:8px;border-radius:50%;cursor:pointer">‹</button>
+				<button class="next" aria-label="下一张" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.35);border:none;color:#fff;padding:8px;border-radius:50%;cursor:pointer">›</button>
+				<div class="dots" style="position:absolute;left:50%;transform:translateX(-50%);bottom:10px;display:flex;gap:8px"></div>
+			</div>
+		</div>
+	</section>
+
+	<main style="padding:18px 24px">
+		<section id="plans">
+			<h2>CAD 平面图</h2>
+			<div class="carousel mini-carousel" id="carousel-plans" style="margin-top:8px;position:relative;border-radius:6px;overflow:hidden;border:1px solid #eee">
+				<div class="slides" style="display:flex;transition:transform .45s ease">
+					<img src="cad1.jpg" alt="cad1" loading="lazy" onerror="this.style.display='none'">
+					<img src="cad2.jpg" alt="cad2" loading="lazy" onerror="this.style.display='none'">
+					<img src="cad3.jpg" alt="cad3" loading="lazy" onerror="this.style.display='none'">
+					<img src="cad4.jpg" alt="cad4" loading="lazy" onerror="this.style.display='none'">
+					<img src="cad5.jpg" alt="cad5" loading="lazy" onerror="this.style.display='none'">
+				</div>
+				<button class="prev" aria-label="上一张" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.28);border:none;color:#fff;padding:6px;border-radius:50%;cursor:pointer">‹</button>
+				<button class="next" aria-label="下一张" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.28);border:none;color:#fff;padding:6px;border-radius:50%;cursor:pointer">›</button>
+				<div class="dots" style="position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:flex;gap:6px"></div>
+				<div class="placeholder" id="plansPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px">管理员未上传</div>
+			</div>
+		</section>
+
+		<section id="renders" style="margin-top:20px">
+			<h2>效果图</h2>
+			<div class="carousel mini-carousel" id="carousel-renders" style="margin-top:8px;position:relative;border-radius:6px;overflow:hidden;border:1px solid #eee">
+				<div class="slides" style="display:flex;transition:transform .45s ease">
+					<img src="render1.jpg" alt="render1" loading="lazy" onerror="this.style.display='none'">
+					<img src="render2.jpg" alt="render2" loading="lazy" onerror="this.style.display='none'">
+					<img src="render3.jpg" alt="render3" loading="lazy" onerror="this.style.display='none'">
+					<img src="render4.jpg" alt="render4" loading="lazy" onerror="this.style.display='none'">
+					<img src="render5.jpg" alt="render5" loading="lazy" onerror="this.style.display='none'">
+				</div>
+				<button class="prev" aria-label="上一张" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.28);border:none;color:#fff;padding:6px;border-radius:50%;cursor:pointer">‹</button>
+				<button class="next" aria-label="下一张" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.28);border:none;color:#fff;padding:6px;border-radius:50%;cursor:pointer">›</button>
+				<div class="dots" style="position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:flex;gap:6px"></div>
+				<div class="placeholder" id="rendersPlaceholder" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px">管理员未上传</div>
+			</div>
+		</section>
+
+		<section id="contact" style="margin-top:26px">
+			<h2>联系我们</h2>
+			<div class="contact">
+				<div class="phone">联系电话：<a href="tel:+8613570925799">+86-135-7092-5799</a></div>
+				<div style="margin-top:8px;color:var(--muted)">地址：海城镇海银路长河五金店对面顺德龙威家具生活馆电梯8F</div>
+				<form id="contactForm" style="margin-top:12px;max-width:520px" onsubmit="event.preventDefault();alert('提交成功！我们会尽快与您联系。');this.reset()">
+					<div style="display:flex;gap:8px;flex-wrap:wrap">
+						<input id="nameInput" placeholder="姓名（可选）" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;height:40px;box-sizing:border-box;resize:none">
+						<input id="phoneInput" required type="tel" placeholder="手机号码（必填）" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;height:40px;box-sizing:border-box;resize:none" maxlength="20">
+					</div>
+					<textarea id="messageInput" placeholder="留言内容（可选，最多50字）" style="width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:4px;height:80px;box-sizing:border-box;resize:none" maxlength="50"></textarea>
+					<button style="margin-top:8px;padding:10px 14px;background:var(--accent);color:#fff;border:none;border-radius:4px;cursor:pointer">提交</button>
+				</form>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		© 汕尾霖墅装饰设计工程有限公司
+	</footer>
+
+	<div id="lightbox" class="lightbox" onclick="closeLightbox()"><img src="" alt="预览"></div>
+
+	<script>
+		/* 轻量级图片预览（用于占位图片） */
+		function openLightbox(img){
+			const lb = document.getElementById('lightbox');
+			lb.querySelector('img').src = img.src;
+			lb.classList.add('show');
+		}
+		function closeLightbox(){
+			const lb = document.getElementById('lightbox');
+			lb.classList.remove('show');
+		}
+
+		/* 轮播逻辑 */
+		(function(){
+			const carousel = document.getElementById('carousel');
+			const audio = document.getElementById('bgMusic');
+			if(!carousel) return;
+			const slides = carousel.querySelector('.slides');
+			const imgs = slides.querySelectorAll('img');
+			const total = imgs.length;
+			let idx = 0;
+			const dotsEl = carousel.querySelector('.dots');
+
+			// 播放音乐（安全方式：使用 catch 处理权限被拒的情况）
+			function triggerAudio(){
+				if(audio && audio.paused){
+					audio.play().catch(()=>{
+						// 播放失败时标记状态，等待真实用户交互
+						if(window.markAudioForPlay) window.markAudioForPlay();
+					});
+				}
+			}
+					// 通用小轮播初始化函数（用于 CAD 和 效果图区）
+					(function(){
+						function initMiniCarousel(rootSelector, interval=4000){
+							const root = document.querySelector(rootSelector);
+							const audio = document.getElementById('bgMusic');
+							if(!root) return;
+							const slides = root.querySelector('.slides');
+							const candidateImgs = slides ? Array.from(slides.querySelectorAll('img')) : [];
+							if(candidateImgs.length===0) return;
+
+							const prevBtn = root.querySelector('.prev');
+							const nextBtn = root.querySelector('.next');
+							const dotsEl = root.querySelector('.dots');
+							const placeholderEl = root.querySelector('.placeholder');
+
+							function triggerAudio(){ if(audio && audio.paused) audio.play().catch(()=>{}); }
+
+							let visibleSrcs = [];
+							let tested = 0;
+
+							// test each candidate src by loading it; only keep successful ones
+							candidateImgs.forEach((img)=>{
+								const src = img.getAttribute('src');
+								if(!src){ tested++; return; }
+								const tester = new Image();
+								tester.onload = ()=>{
+									visibleSrcs.push(src);
+									tested++;
+									if(placeholderEl) placeholderEl.style.display='none';
+									maybeBuild();
+								};
+								tester.onerror = ()=>{
+									tested++;
+									maybeBuild();
+								};
+								tester.src = src;
+							});
+
+							// fallback: after timeout, proceed with whatever we have
+							const buildTimeout = setTimeout(()=>{ tested = candidateImgs.length; maybeBuild(); }, 700);
+
+							function maybeBuild(){
+								if(tested < candidateImgs.length) return;
+								clearTimeout(buildTimeout);
+								buildCarouselFrom(visibleSrcs);
+							}
+
+							function buildCarouselFrom(srcList){
+								// clear existing slides and populate only with found images
+								slides.innerHTML = '';
+								srcList.forEach(src=>{
+									const i = document.createElement('img');
+									i.src = src;
+									i.alt = '';
+									i.loading = 'lazy';
+									i.style.width = '100%';
+									i.style.flexShrink = '0';
+									i.style.objectFit = 'contain';
+									i.style.objectPosition = 'center';
+									slides.appendChild(i);
+								});
+
+								const total = srcList.length;
+								let idx = 0;
+								let timer = null;
+
+								function clearDots(){ if(dotsEl) dotsEl.innerHTML = ''; }
+								function createDots(){
+									clearDots();
+									if(!dotsEl) return;
+									for(let i=0;i<total;i++){
+										const d = document.createElement('button');
+										d.style.width='8px';d.style.height='8px';d.style.borderRadius='50%';d.style.border='none';d.style.background='rgba(255,255,255,.6)';d.style.cursor='pointer';
+										d.dataset.i = i;
+										d.addEventListener('click',()=>{ goTo(parseInt(d.dataset.i)); resetTimer(); triggerAudio(); });
+										dotsEl.appendChild(d);
+									}
+								}
+
+								function update(){
+									slides.style.transform = `translateX(${-idx*100}%)`;
+									const ds = dotsEl ? dotsEl.querySelectorAll('button') : [];
+									ds.forEach((b,i)=>{
+										b.style.background = (i===idx)?'var(--accent)':'rgba(255,255,255,.6)';
+										if(i===idx) b.classList.add('active'); else b.classList.remove('active');
+									});
+									// animate slides: highlight current image
+									const imgsIn = slides.querySelectorAll('img');
+									imgsIn.forEach((im, i)=>{
+										if(i===idx){ im.style.opacity = '1'; im.style.transform = 'scale(1.02)'; }
+										else { im.style.opacity = '0'; im.style.transform = 'scale(1)'; }
+									});
+								}
+								function goTo(i){ if(total===0) return; idx = (i+total)%total; update(); }
+
+								if(total<=1){ if(dotsEl) dotsEl.style.display='none'; if(prevBtn) prevBtn.style.display='none'; if(nextBtn) nextBtn.style.display='none'; }
+								else { if(dotsEl) dotsEl.style.display='flex'; if(prevBtn) prevBtn.style.display='inline-block'; if(nextBtn) nextBtn.style.display='inline-block'; }
+
+								createDots(); update();
+
+								if(prevBtn) prevBtn.addEventListener('click', ()=>{ goTo(idx-1); resetTimer(); triggerAudio(); });
+								if(nextBtn) nextBtn.addEventListener('click', ()=>{ goTo(idx+1); resetTimer(); triggerAudio(); });
+
+								function startTimer(){ if(total>1) timer = setInterval(()=>{ goTo(idx+1); }, interval); }
+								function resetTimer(){ clearInterval(timer); startTimer(); }
+								startTimer();
+
+								// touch support
+								let touchStartX = 0;
+								const minSwipeDistance = 40;
+								root.addEventListener('touchstart', (e)=>{ touchStartX = e.changedTouches[0].clientX; resetTimer(); triggerAudio(); }, false);
+								root.addEventListener('touchend', (e)=>{ const touchEndX = e.changedTouches[0].clientX; const diff = touchStartX - touchEndX; if(diff>minSwipeDistance){ goTo(idx+1); triggerAudio(); } else if(diff<-minSwipeDistance){ goTo(idx-1); triggerAudio(); } resetTimer(); }, false);
+							}
+						}
+
+						initMiniCarousel('#carousel-plans', 3500);
+						initMiniCarousel('#carousel-renders', 3500);
+					})();
+
+			// 创建 dots
+			for(let i=0;i<total;i++){
+				const d = document.createElement('button');
+				d.style.width='10px';d.style.height='10px';d.style.borderRadius='50%';d.style.border='none';d.style.background='rgba(255,255,255,.6)';d.style.cursor='pointer';
+				d.dataset.i = i;
+				d.addEventListener('click',()=>{goTo(parseInt(d.dataset.i));resetTimer();triggerAudio()});
+				dotsEl.appendChild(d);
+			}
+
+			// 根据可见图片数量决定是否显示控件（处理图片加载/出错）
+			(function(){
+				const prev = carousel.querySelector('.prev');
+				const next = carousel.querySelector('.next');
+				function updateControls(){
+					let visible = 0;
+					imgs.forEach(img=>{ if(img.complete && img.naturalWidth>0 && img.style.display!=='none') visible++; });
+					// 如果图片尚未加载，fallback 使用元素数量
+					if(visible===0) visible = Array.from(imgs).filter(i=>i.getAttribute('src')).length;
+					if(visible<=1){ if(dotsEl) dotsEl.style.display='none'; if(prev) prev.style.display='none'; if(next) next.style.display='none'; }
+					else { if(dotsEl) dotsEl.style.display='flex'; if(prev) prev.style.display='inline-block'; if(next) next.style.display='inline-block'; }
+				}
+				imgs.forEach(img=>{ img.addEventListener('load', updateControls); img.addEventListener('error', updateControls); });
+				// initial
+				setTimeout(updateControls,100);
+			})();
+
+			const dots = dotsEl.querySelectorAll('button');
+			function update(){
+				slides.style.transform = `translateX(${-idx*100}%)`;
+				dots.forEach((b,i)=>{
+					b.style.background = (i===idx)?'var(--accent)':'rgba(255,255,255,.6)';
+					if(i===idx) b.classList.add('active'); else b.classList.remove('active');
+				});
+				// animate main slides: opacity + slight zoom on active
+				imgs.forEach((im,i)=>{
+					if(i===idx){ im.style.opacity = '1'; im.style.transform = 'scale(1.02)'; }
+					else { im.style.opacity = '0'; im.style.transform = 'scale(1)'; }
+				});
+			}
+			function goTo(i){ idx = (i+total)%total; update() }
+			carousel.querySelector('.prev').addEventListener('click',()=>{goTo(idx-1);resetTimer();triggerAudio()});
+			carousel.querySelector('.next').addEventListener('click',()=>{goTo(idx+1);resetTimer();triggerAudio()});
+
+			let timer = null;
+			function startTimer(){ timer = setInterval(()=>{goTo(idx+1)},4000) }
+			function resetTimer(){ clearInterval(timer); startTimer() }
+			update(); startTimer();
+
+			// 触摸滑动支持
+			let touchStartX = 0;
+			let touchEndX = 0;
+			const minSwipeDistance = 50; // 最小滑动距离（像素）
+			
+			carousel.addEventListener('touchstart', (e)=>{
+				touchStartX = e.changedTouches[0].clientX;
+				resetTimer();
+				// 触摸开始时立即尝试触发音乐
+				triggerAudio();
+			}, false);
+			
+			carousel.addEventListener('touchend', (e)=>{
+				touchEndX = e.changedTouches[0].clientX;
+				const diff = touchStartX - touchEndX;
+				
+				// 向左滑动（显示下一张）
+				if(diff > minSwipeDistance){
+					goTo(idx+1);
+					triggerAudio();
+				}
+				// 向右滑动（显示上一张）
+				else if(diff < -minSwipeDistance){
+					goTo(idx-1);
+					triggerAudio();
+				}
+				resetTimer();
+				// 触摸结束时再次确保音乐播放
+				triggerAudio();
+			}, false);
+		})();
+
+		// 如果 CAD 或 效果图区域有图片加载成功，则隐藏占位提示
+		document.addEventListener('DOMContentLoaded', ()=>{
+			function hidePlaceholder(galleryId, placeholderId){
+				const gallery = document.getElementById(galleryId);
+				const placeholder = document.getElementById(placeholderId);
+				if(!gallery || !placeholder) return;
+				const imgs = gallery.querySelectorAll('img');
+				let anyVisible = false;
+				imgs.forEach(img=>{
+					if(img.complete && img.naturalWidth>0) anyVisible = true;
+					else {
+						// 如果尚未加载，监听 load 事件
+						img.addEventListener('load', ()=>{ placeholder.style.display='none' });
+					}
+				});
+				if(anyVisible) placeholder.style.display='none';
+			}
+			hidePlaceholder('plansGallery','plansPlaceholder');
+			hidePlaceholder('rendersGallery','rendersPlaceholder');
+		});
+
+		// 表单输入限制：禁止 textarea/输入框被拉伸，限制留言为 50 字并截断粘贴超长内容
+		(function(){
+			const msg = document.getElementById('messageInput');
+			if(!msg) return;
+			// 确保 maxlength 属性存在
+			const max = parseInt(msg.getAttribute('maxlength')||'50',10);
+			// 在输入时截断
+			msg.addEventListener('input', ()=>{
+				if(msg.value.length>max) msg.value = msg.value.slice(0,max);
+			});
+			// 在粘贴时也截断（防止一次性粘贴超长）
+			msg.addEventListener('paste', (e)=>{
+				const paste = (e.clipboardData || window.clipboardData).getData('text');
+				if(!paste) return;
+				const allowed = max - msg.value.length;
+				if(allowed<=0){
+					e.preventDefault();
+					return;
+				}
+				if(paste.length>allowed){
+					e.preventDefault();
+					const truncated = paste.slice(0,allowed);
+					// 插入截断后的内容
+					const start = msg.selectionStart || 0;
+					const end = msg.selectionEnd || 0;
+					msg.value = msg.value.slice(0,start) + truncated + msg.value.slice(end);
+					// 置光标到末尾的插入位置
+					const pos = start + truncated.length;
+					msg.setSelectionRange(pos,pos);
+				}
+			});
+		})();
+
+		// 额外脚本：滚动 reveal、平滑锚点、返回顶部按钮、logo 动画触发
+		(function(){
+			// logo reveal
+			const logoWrap = document.querySelector('.logo');
+			if(logoWrap){ window.requestAnimationFrame(()=>{ logoWrap.classList.add('show'); }); }
+
+			// 平滑锚点
+			document.querySelectorAll('a[href^="#"]').forEach(a=>{
+				a.addEventListener('click', (e)=>{
+					e.preventDefault();
+					const id = a.getAttribute('href').slice(1);
+					const el = document.getElementById(id);
+					if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+				});
+			});
+
+			// back to top
+			const back = document.createElement('button');
+			back.id = 'backTop'; back.innerHTML = '↑';
+			document.body.appendChild(back);
+			back.addEventListener('click', ()=>window.scrollTo({top:0,behavior:'smooth'}));
+			window.addEventListener('scroll', ()=>{
+				if(window.scrollY>300) back.classList.add('show'); else back.classList.remove('show');
+			});
+
+			// reveal on scroll (cards and sections)
+			const obs = new IntersectionObserver((entries)=>{
+				entries.forEach(ent=>{
+					if(ent.isIntersecting) ent.target.classList.add('visible');
+				});
+			},{threshold:0.12});
+			document.querySelectorAll('.card, .hero, .company, h2').forEach(el=>{
+				if(!el.classList.contains('reveal')) el.classList.add('reveal');
+				obs.observe(el);
+			});
+		})();
+
+		// 移动端导航切换
+		(function(){
+			const btn = document.getElementById('menuBtn');
+			const nav = document.getElementById('mainNav');
+			if(!btn || !nav) return;
+			btn.setAttribute('aria-expanded','false');
+			nav.setAttribute('aria-hidden','true');
+
+			const openMenu = ()=>{
+				nav.classList.add('show');
+				btn.classList.add('active');
+				btn.setAttribute('aria-expanded','true');
+				nav.setAttribute('aria-hidden','false');
+			};
+			const closeMenu = ()=>{
+				nav.classList.remove('show');
+				btn.classList.remove('active');
+				btn.setAttribute('aria-expanded','false');
+				nav.setAttribute('aria-hidden','true');
+			};
+
+			btn.addEventListener('click', (e)=>{
+				e.stopPropagation();
+				if(nav.classList.contains('show')) closeMenu(); else openMenu();
+			});
+
+			// 点击导航内的链接时自动关闭（更好地支持单页锚点）
+			nav.addEventListener('click', (e)=>{
+				const a = e.target.closest('a');
+				if(a) closeMenu();
+			});
+
+			// 点击页面其他地方则关闭导航
+			document.addEventListener('click', (e)=>{
+				if(!nav.classList.contains('show')) return;
+				if(e.target === btn || nav.contains(e.target)) return;
+				closeMenu();
+			});
+		})();
+
+		// 背景音乐播放控制：用户交互后才开始播放
+		(function(){
+			const audio = document.getElementById('bgMusic');
+			if(!audio) return;
+			
+			let isPlaying = false;
+			
+			// 用户首次交互时播放音乐（仅在真实用户点击/按键时触发）
+			const startPlayOnInteraction = ()=>{
+				if(!isPlaying){
+					audio.play().catch(()=>{});
+					isPlaying = true;
+					// 移除事件监听，避免重复触发
+					document.removeEventListener('click', startPlayOnInteraction);
+					document.removeEventListener('keydown', startPlayOnInteraction);
+				}
+			};
+			
+			// 监听真实的用户点击和按键事件
+			document.addEventListener('click', startPlayOnInteraction, true);
+			document.addEventListener('keydown', startPlayOnInteraction, true);
+			
+			// 监听播放/暂停状态
+			audio.addEventListener('play', ()=>{
+				isPlaying = true;
+			});
+			audio.addEventListener('pause', ()=>{
+				isPlaying = false;
+			});
+		})();
+	</script>
+</body>
+</html>
+
